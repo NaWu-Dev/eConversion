@@ -28,16 +28,16 @@ class Temperature {
         return temperatureMap[index]
     }
     
-    func getF(index: Int) -> Double {
-        return round((Double(temperatureMap[index])*1.8+32)*10)/10
+    func getF(index: Int) -> Int {
+        return Int(Double(temperatureMap[index])*1.8+32)
     }
     
-    func calculateC2F (tempC: Double) -> Double {
-        return round(Double((tempC*1.8)+32)*10)/10
+    func calculateC2F (tempC: Int) -> Int {
+        return Int(Double(tempC)*1.8+32)
     }
     
-    func calculateF2C (tempF: Double) -> Double {
-        return round(Double((tempF-32)*0.5556)*10)/10
+    func calculateF2C (tempF: Int) -> Int {
+        return Int(Double(tempF-32)*0.5556)
     }
     
 }

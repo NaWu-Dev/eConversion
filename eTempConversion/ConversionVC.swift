@@ -10,7 +10,8 @@ import UIKit
 
 class ConversionVC: UIViewController, UITableViewDelegate, UITableViewDataSource, UITextFieldDelegate{
 
-
+    let defaultTableViewSelected = UserDefaults.standard
+    
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var tfF: UITextField!
     @IBOutlet weak var tfC: UITextField!
@@ -21,28 +22,34 @@ class ConversionVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         moveTextField(textField: sender, moveDistance: -150, up: true)
     }
     
-    @IBAction func tfCValueChanged(_ sender: UITextField) {
-        tfF.text = ""
+    @IBAction func tfCEditingChanged(_ sender: UITextField) {
+        if let tempC = Int(sender.text!) {
+            let tempF = temperature.calculateC2F(tempC: tempC)
+            tfF.text = String(tempF)
+        }
     }
     
     @IBAction func tfCEditEnd(_ sender: UITextField) {
-        if let tempC = Double(tfC.text!) {
+        if let tempC = Int(sender.text!) {
             let tempF = temperature.calculateC2F(tempC: tempC)
             tfF.text = String(tempF)
         }
         moveTextField(textField: sender, moveDistance: -150, up: false)
     }
     
+    @IBAction func tfFEditingChanged(_ sender: UITextField) {
+        if let tempF = Int(sender.text!) {
+            let tempC = temperature.calculateF2C(tempF: tempF)
+            tfC.text = String(tempC)
+        }
+    }
+    
     @IBAction func tfFEditDidBegin(_ sender: UITextField) {
         moveTextField(textField: sender, moveDistance: -150, up: true)
     }
     
-    @IBAction func tfFValueChanged(_ sender: UITextField) {
-        tfC.text = ""
-    }
-    
     @IBAction func tfFEditEnd(_ sender: UITextField) {
-        if let tempF = Double(tfF.text!) {
+        if let tempF = Int(sender.text!) {
             let tempC = temperature.calculateF2C(tempF: tempF)
             tfC.text = String(tempC)
         }
@@ -58,8 +65,27 @@ class ConversionVC: UIViewController, UITableViewDelegate, UITableViewDataSource
         tfF.placeholder = "Enter °F"
         
         // Initial temperature map by °C *10
-        temperature.initTemp(range: 20)       
+        let range = 40
+        temperature.initTemp(range: range)
         
+        let defaultRow = defaultTableViewSelected.integer(forKey: "DefaultTableViewSelected")
+        
+        let defaultSelectedRow : IndexPath = IndexPath(row: defaultRow, section: 0)
+        
+        tableView.selectRow(at: defaultSelectedRow, animated: true, scrollPosition: .none)
+        
+        if defaultRow + 2 > range {
+            let defaultSelectedRowNext : IndexPath = IndexPath(row: range, section: 0)
+            tableView.scrollToRow(at: defaultSelectedRowNext, at: .none, animated: true)
+        } else {
+            let defaultSelectedRowNext : IndexPath = IndexPath(row: defaultTableViewSelected.integer(forKey: "DefaultTableViewSelected")+2, section: 0)
+            tableView.scrollToRow(at: defaultSelectedRowNext, at: .none, animated: true)
+        }
+       
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        defaultTableViewSelected.set(indexPath.row, forKey: "DefaultTableViewSelected")
     }
 
     override func didReceiveMemoryWarning() {
@@ -78,14 +104,14 @@ class ConversionVC: UIViewController, UITableViewDelegate, UITableViewDataSource
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell")!
         
-        cell.textLabel!.text = String(temperature.getC(index: indexPath.row))+"  °C"
-        cell.detailTextLabel!.text = String(temperature.getF(index: indexPath.row))+"  °F"
+        cell.textLabel!.text = String(temperature.getC(index: indexPath.row))
+        cell.detailTextLabel!.text = String(temperature.getF(index: indexPath.row))
         
         return cell
     }
     
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
-        return "°C                              °F"
+        return "°C                          °F"
     }
     
     // Scroll table view when keyboard display
